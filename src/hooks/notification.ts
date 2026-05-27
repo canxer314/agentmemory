@@ -34,27 +34,24 @@ async function main() {
 
   const sessionId = (data.session_id as string) || "unknown";
 
-  try {
-    await fetch(`${REST_URL}/agentmemory/observe`, {
-      method: "POST",
-      headers: authHeaders(),
-      body: JSON.stringify({
-        hookType: "notification",
-        sessionId,
-        project: resolveProject(data.cwd as string | undefined),
-        cwd: (data.cwd as string | undefined) || process.cwd(),
-        timestamp: new Date().toISOString(),
-        data: {
-          notification_type: data.notification_type,
-          title: data.title,
-          message: data.message,
-        },
-      }),
-      signal: AbortSignal.timeout(2000),
-    });
-  } catch {
-    // fire and forget
-  }
+  fetch(`${REST_URL}/agentmemory/observe`, {
+    method: "POST",
+    headers: authHeaders(),
+    body: JSON.stringify({
+      hookType: "notification",
+      sessionId,
+      project: resolveProject(data.cwd as string | undefined),
+      cwd: (data.cwd as string | undefined) || process.cwd(),
+      timestamp: new Date().toISOString(),
+      data: {
+        notification_type: data.notification_type,
+        title: data.title,
+        message: data.message,
+      },
+    }),
+    signal: AbortSignal.timeout(2000),
+  }).catch(() => {});
+  setTimeout(() => process.exit(0), 500).unref();
 }
 
 main();
